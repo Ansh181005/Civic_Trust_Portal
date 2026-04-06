@@ -1,0 +1,19 @@
+﻿services/jobs.service.ts(47,16): error TS2339: Property 'title' does not exist on type 'never'.
+services/jobs.service.ts(48,19): error TS2339: Property 'provider' does not exist on type 'never'.
+services/jobs.service.ts(49,19): error TS2339: Property 'deadline' does not exist on type 'never'.
+services/jobs.service.ts(52,16): error TS2339: Property 'type' does not exist on type 'never'.
+services/jobs.service.ts(53,16): error TS2339: Property 'title' does not exist on type 'never'.
+services/jobs.service.ts(54,19): error TS2339: Property 'company' does not exist on type 'never'.
+services/jobs.service.ts(55,19): error TS2339: Property 'job_type' does not exist on type 'never'.
+services/jobs.service.ts(59,16): error TS2339: Property 'name' does not exist on type 'never'.
+services/jobs.service.ts(60,19): error TS2339: Property 'category' does not exist on type 'never'.
+services/notifications.service.ts(31,13): error TS2345: Argument of type '{ read: boolean; }' is not assignable to parameter of type 'never'.
+services/notifications.service.ts(41,13): error TS2345: Argument of type '{ read: boolean; }' is not assignable to parameter of type 'never'.
+services/profile.service.ts(23,13): error TS2345: Argument of type 'Partial<Pick<{ id: string; full_name: string | null; email: string | null; phone: string | null; state: string | null; category: string | null; date_of_birth: string | null; avatar_url: string | null; ... 5 more ...; updated_at: string; }, "email" | ... 8 more ... | "job_alerts">>' is not assignable to parameter of type 'never'.
+services/saved-opportunities.service.ts(24,6): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(values: never, options?: { count?: "exact" | "planned" | "estimated" | undefined; } | undefined): PostgrestFilterBuilder<{ PostgrestVersion: "12"; }, never, never, null, "saved_opportunities", never, "POST">', gave the following error.
+    Argument of type '{ user_id: string; opportunity_type: string; opportunity_id: string; title: string; }' is not assignable to parameter of type 'never'.
+  Overload 2 of 2, '(values: never[], options?: { count?: "exact" | "planned" | "estimated" | undefined; defaultToNull?: boolean | undefined; } | undefined): PostgrestFilterBuilder<{ PostgrestVersion: "12"; }, never, never, null, "saved_opportunities", never, "POST">', gave the following error.
+    Object literal may only specify known properties, and 'user_id' does not exist in type 'never[]'.
+services/transparency.service.ts(44,13): error TS2339: Property 'department' does not exist on type 'never'.
+services/transparency.service.ts(45,21): error TS2339: Property 'budget_share' does not exist on type 'never'.
