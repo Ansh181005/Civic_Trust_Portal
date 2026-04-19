@@ -12,8 +12,8 @@ import localJobsData from "@/app/data/jobs.json"
 import type { Job } from "@/types/database"
 
 // Map RapidAPI LinkedIn jobs to match the existing UI data structure
-const mappedLocalJobs: Job[] = (localJobsData as any[]).map((j: any) => ({
-  id: j.id || Math.random().toString(),
+const mappedLocalJobs: Job[] = (localJobsData as any[]).map((j: any, index: number) => ({
+  id: j.id || `local-job-${index}-${Date.now()}`,
   title: j.title || "Unknown Title",
   job_type: j.employment_type?.[0]?.replace("_", " ") || "FULL TIME",
   type: (j.employment_type?.[0] || "").toLowerCase().includes("intern") || (j.title || "").toLowerCase().includes("intern") ? "internship" : "job",
@@ -50,8 +50,12 @@ export default function JobsPage() {
     const debounce = setTimeout(() => {
       getJobs(search || undefined, tab !== "all" ? tab : undefined)
         .then((dbJobs) => {
-          // Combine DB jobs with our newly fetched JSON jobs
-          const combined = [...mappedLocalJobs, ...dbJobs]
+          // Combine DB jobs with local jobs, ensuring unique IDs
+          const dbJobsWithPrefix = dbJobs.map(job => ({
+            ...job,
+            id: job.id.startsWith('db-') ? job.id : `db-${job.id}`
+          }))
+          const combined = [...mappedLocalJobs, ...dbJobsWithPrefix]
           setJobs(applyFilters(combined))
         })
         .catch(() => {
@@ -89,59 +93,64 @@ export default function JobsPage() {
           <TabsTrigger value="internship">Internships</TabsTrigger>
         </TabsList>
 
-        <TabsContent value={tab} className="mt-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {jobs.map((j) => (
-              <Card key={j.id} className="border border-border bg-card hover:bg-muted/50 transition-colors">
-                <CardContent className="flex flex-col justify-between h-full gap-3 p-5">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-semibold text-foreground leading-tight">{j.title}</h3>
-                      <Badge
-                        variant={j.type === "job" ? "default" : "secondary"}
-                        className="shrink-0 text-[10px] capitalize whitespace-nowrap"
-                      >
-                        {j.job_type}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
-                      <Building className="h-4 w-4" />
-                      {j.company}
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-3">{j.snippet}</p>
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-2">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4" /> {j.location}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Banknote className="h-4 w-4" /> {j.salary}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-end justify-between mt-4">
-                    <Badge variant="outline" className="text-[10px] bg-background">
-                      <ExternalLink className="mr-1 h-3 w-3" />
-                      {j.source}
-                    </Badge>
-                    
-                    <Button size="sm" asChild className="shrink-0 font-medium">
-                      <a href={(j as any).url || "#"} target="_blank" rel="noopener noreferrer">
-                        Apply
-                      </a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        {(["all", "job", "internship"] as const).map((tabValue) => {
+          const filtered = tabValue === "all" ? jobs : jobs.filter((j) => j.type === tabValue)
+          return (
+            <TabsContent key={tabValue} value={tabValue} className="mt-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {filtered.map((j) => (
+                  <Card key={j.id} className="border border-border bg-card hover:bg-muted/50 transition-colors">
+                    <CardContent className="flex flex-col justify-between h-full gap-3 p-5">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-semibold text-foreground leading-tight">{j.title}</h3>
+                          <Badge
+                            variant={j.type === "job" ? "default" : "secondary"}
+                            className="shrink-0 text-[10px] capitalize whitespace-nowrap"
+                          >
+                            {j.job_type}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
+                          <Building className="h-4 w-4" />
+                          {j.company}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-3">{j.snippet}</p>
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-2">
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4" /> {j.location}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Banknote className="h-4 w-4" /> {j.salary}
+                          </span>
+                        </div>
+                      </div>
 
-          {loaded && jobs.length === 0 && (
-            <div className="rounded-lg border border-border bg-card p-8 text-center mt-4">
-              <p className="text-muted-foreground">No listings found matching your search.</p>
-            </div>
-          )}
-        </TabsContent>
+                      <div className="flex items-end justify-between mt-4">
+                        <Badge variant="outline" className="text-[10px] bg-background">
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          {j.source}
+                        </Badge>
+
+                        <Button size="sm" asChild className="shrink-0 font-medium">
+                          <a href={(j as any).url || "#"} target="_blank" rel="noopener noreferrer">
+                            Apply
+                          </a>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {loaded && filtered.length === 0 && (
+                <div className="rounded-lg border border-border bg-card p-8 text-center mt-4">
+                  <p className="text-muted-foreground">No listings found matching your search.</p>
+                </div>
+              )}
+            </TabsContent>
+          )
+        })}
       </Tabs>
     </div>
   )
