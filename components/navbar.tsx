@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@/context/auth-context"
+import { useUser, useClerk } from "@clerk/nextjs"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -17,7 +17,8 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { user, signOut } = useAuth()
+  const { user } = useUser()
+  const { signOut } = useClerk()
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
@@ -47,18 +48,18 @@ export function Navbar() {
               <Link href="/dashboard">
                 <Button size="sm">Dashboard</Button>
               </Link>
-              <Button variant="outline" size="sm" onClick={() => signOut()}>
+              <Button variant="outline" size="sm" onClick={() => signOut({ redirectUrl: "/" })}>
                 Log Out
               </Button>
             </>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/sign-in">
                 <Button variant="outline" size="sm">
                   Log In
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/sign-up">
                 <Button size="sm">Get Started</Button>
               </Link>
             </>
@@ -94,16 +95,16 @@ export function Navbar() {
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full" size="sm">Dashboard</Button>
                 </Link>
-                <Button variant="outline" className="w-full" size="sm" onClick={() => { signOut(); setMobileOpen(false) }}>
+                <Button variant="outline" className="w-full" size="sm" onClick={() => { signOut({ redirectUrl: "/" }); setMobileOpen(false) }}>
                   Log Out
                 </Button>
               </>
             ) : (
               <>
-                <Link href="/login" onClick={() => setMobileOpen(false)}>
+                <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
                   <Button variant="outline" className="w-full" size="sm">Log In</Button>
                 </Link>
-                <Link href="/login" onClick={() => setMobileOpen(false)}>
+                <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full" size="sm">Get Started</Button>
                 </Link>
               </>

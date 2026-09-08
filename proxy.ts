@@ -1,68 +1,34 @@
-import { createServerClient } from '@supabase/ssr'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Routes that require authentication
-const protectedPrefixes = ['/dashboard', '/profile', '/notifications', '/rights', '/jobs', '/scholarships', '/schemes', '/transparency']
+// Define which routes require authentication
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/jobs(.*)',
+  '/scholarships(.*)',
+  '/schemes(.*)',
+  '/rights(.*)',
+  '/notifications(.*)',
+  '/profile(.*)',
+  '/transparency(.*)',
+])
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Only run auth check for protected routes and /login
-  const isProtected = protectedPrefixes.some((p) => pathname.startsWith(p))
-  const isLogin = pathname === '/login'
-
-  // Skip middleware entirely for non-protected, non-login routes (huge perf win)
-  if (!isProtected && !isLogin) {
-    return NextResponse.next()
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  // If it's a protected route and user is not signed in, redirect to sign-in
+  if (isProtectedRoute(req)) {
+    await auth.protect()
   }
-
-  let supabaseResponse = NextResponse.next({ request })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Redirect unauthenticated users away from protected routes
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(url)
-  }
-
-  // Redirect authenticated users away from login page
-  if (isLogin && user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
-}
+  return NextResponse.next()
+})
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for Clerk's auto-proxy path
+    '/__clerk/:path*',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 }
+

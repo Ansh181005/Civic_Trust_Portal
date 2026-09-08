@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ClerkProvider } from '@clerk/nextjs'
 import { AuthProvider } from '@/context/auth-context'
 import { Chatbot } from '@/components/chatbot'
 import './globals.css'
@@ -22,14 +23,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased" suppressHydrationWarning>
-        <AuthProvider>
-          {children}
-          <Chatbot />
-        </AuthProvider>
-        <Analytics />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className="font-sans antialiased" suppressHydrationWarning>
+          <AuthProvider>
+            {children}
+            <Chatbot />
+          </AuthProvider>
+          <Analytics />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
