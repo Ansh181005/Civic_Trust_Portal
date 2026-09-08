@@ -132,9 +132,3 @@ export async function sendNotificationEmail(input: NotificationEmailInput) {
     `,
   })
 }
-          This alert is from Civic Trust realtime notifications.
-        </p>
-      </div>
-    `,
-  })
-}
