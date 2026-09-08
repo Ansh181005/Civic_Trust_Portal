@@ -391,7 +391,3 @@ This project is licensed under the **ISC License**.
 - Aligned with the UN Sustainable Development Goals (SDGs) for inclusive and transparent governance
 
 ---
-
-<div align="center">
-  <p>Made with ❤️ for every citizen</p>
-</div>
